@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InkStudio Pro - CRM para Estudio de Tatuajes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        
+        :root {
+            --bg-primary: #050509;
+            --bg-card: #0f0f14;
+            --border: #2a2c3a;
+            --accent: #dc2626;
+            --accent-hover: #b91c1c;
+            --gold: #f59e0b;
+            --purple: #8b5cf6;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #050509 0%, #0a0a12 50%, #050509 100%);
+            color: #f5f5f7;
+            min-height: 100vh;
+        }
+        
+        .gradient-ink {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 50%, #0a0a1a 100%);
+        }
+        
+        .gradient-card {
+            background: linear-gradient(145deg, rgba(20, 20, 25, 0.95) 0%, rgba(15, 15, 20, 0.98) 100%);
+        }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        }
+        
+        .gradient-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.6); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .card-tattoo {
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .card-tattoo:hover {
+            border-color: rgba(220, 38, 38, 0.5);
+            box-shadow: 0 10px 40px rgba(220, 38, 38, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .star-filled {
+            color: #fbbf24;
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+        }
+        
+        .star-empty {
+            color: #374151;
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(220, 38, 38, 0.2) 0%, rgba(153, 27, 27, 0.1) 100%);
+            border-right: 2px solid #dc2626;
+        }
+        
+        .calendar-day {
+            min-height: 70px;
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-day:hover {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+        
+        .calendar-day.today {
+            border-color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(220, 38, 38, 0.4);
+            border-radius: 4px;
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        
+        .badge-tattoo {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
+        }
+        
+        .badge-piercing {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #c4b5fd;
+        }
+        
+        .input-dark {
+            background: #1a1a20;
+            border: 1px solid #2a2c3a;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .input-dark:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
+        }
+        
+        .btn-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+            color: black;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gold:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="app" class="min-h-screen">
+        <!-- Mobile Header -->
+        <div class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-gray-900/95 backdrop-blur-md border-b border-red-900/20 z-50 flex items-center justify-between px-4">
+            <div class="flex items-center gap-3">
+                <button id="mobile-menu-btn" class="p-2 rounded-lg hover:bg-white/10 transition">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center animate-pulse-glow">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="font-bold text-lg">InkStudio</span>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 gradient-ink border-r border-red-900/20 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+            <div class="p-6 border-b border-red-900/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center animate-pulse-glow">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white tracking-wider">INKSTUDIO</h1>
+                        <p class="text-xs text-red-400/70 uppercase tracking-widest">Pro CRM</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="p-4 space-y-1">
+                <button onclick="showView('dashboard')" data-view="dashboard" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Dashboard</span>
+                </button>
+                <button onclick="showView('clientes')" data-view="clientes" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-400 hover:text-white">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span class="font-medium">Clientes</span>
+                </button>
+                <button onclick="showView('citas')" data-view="citas" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-400 hover:text-white">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span class="font-medium">Citas</span>
+                </button>
+                <button onclick="showView('seguimiento')" data-view="seguimiento" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-400 hover:text-white">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span class="font-medium">Seguimiento</span>
+                    <span id="seguimiento-badge" class="ml-auto w-2 h-2 rounded-full bg-purple-500 hidden"></span>
+                </button>
+                <button onclick="showView('lealtad')" data-view="lealtad" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-400 hover:text-white">
+                    <i data-lucide="star" class="w-5 h-5"></i>
+                    <span class="font-medium">Programa Lealtad</span>
+                </button>
+            </nav>
+
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-red-900/20">
+                <button onclick="exportData()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    <span class="font-medium">Exportar Datos</span>
+                </button>
+                <p class="text-xs text-gray-600 text-center mt-4">InkStudio Pro v1.0</p>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile -->
+        <div id="overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+        <!-- Main Content -->
+        <main class="lg:ml-64 min-h-screen pt-16 lg:pt-0 p-4 lg:p-8">
+            <!-- DASHBOARD VIEW -->
+            <div id="view-dashboard" class="view-section max-w-7xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-white">Dashboard</h2>
+                    <p class="text-gray-400 mt-1">Bienvenido de vuelta al estudio</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm text-gray-400">Total Clientes</p>
+                                <p id="stat-clientes" class="text-3xl font-bold text-white mt-2">0</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                <i data-lucide="users" class="w-6 h-6 text-blue-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm text-gray-400">Citas Hoy</p>
+                                <p id="stat-citas-hoy" class="text-3xl font-bold text-white mt-2">0</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                                <i data-lucide="calendar" class="w-6 h-6 text-red-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm text-gray-400">Citas Pendientes</p>
+                                <p id="stat-pendientes" class="text-3xl font-bold text-white mt-2">0</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                                <i data-lucide="clock" class="w-6 h-6 text-yellow-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm text-gray-400">Clientes VIP</p>
+                                <p id="stat-vip" class="text-3xl font-bold text-white mt-2">0</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                <i data-lucide="star" class="w-6 h-6 text-purple-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <h3 class="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="activity" class="w-5 h-5 text-red-400"></i>
+                            Actividad Reciente
+                        </h3>
+                        <div id="actividad-list" class="space-y-3">
+                            <p class="text-gray-400 text-center py-4">No hay actividad reciente</p>
+                        </div>
+                    </div>
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <h3 class="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="info" class="w-5 h-5 text-red-400"></i>
+                            Próximas Citas
+                        </h3>
+                        <div id="proximas-citas" class="space-y-3">
+                            <p class="text-gray-400 text-center py-4">No hay citas programadas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLIENTES VIEW -->
+            <div id="view-clientes" class="view-section hidden max-w-7xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white">Clientes</h2>
+                        <p class="text-gray-400 mt-1">Gestión de clientes del estudio</p>
+                    </div>
+                    <button onclick="openModal('cliente')" class="btn-primary px-4 py-2 rounded-xl text-white flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Nuevo Cliente
+                    </button>
+                </div>
+
+                <div class="relative mb-6">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+                    <input type="text" id="search-clientes" placeholder="Buscar clientes..." 
+                           class="input-dark w-full pl-10 pr-4 py-3 rounded-xl"
+                           oninput="filterClientes()">
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="gradient-card rounded-xl p-4 border border-red-900/20">
+                        <p id="total-clientes-stat" class="text-2xl font-bold text-white">0</p>
+                        <p class="text-sm text-gray-400">Total clientes</p>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-red-900/20">
+                        <p id="clientes-5-estrellas" class="text-2xl font-bold text-white">0</p>
+                        <p class="text-sm text-gray-400">Con 5+ estrellas</p>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-red-900/20">
+                        <p id="total-estrellas" class="text-2xl font-bold text-white">0</p>
+                        <p class="text-sm text-gray-400">Estrellas totales</p>
+                    </div>
+                </div>
+
+                <div id="clientes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Clientes se renderizan aquí -->
+                </div>
+            </div>
+
+            <!-- CITAS VIEW -->
+            <div id="view-citas" class="view-section hidden max-w-7xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white">Agenda de Citas</h2>
+                        <p class="text-gray-400 mt-1">Gestiona las citas del estudio</p>
+                    </div>
+                    <button onclick="openModal('cita')" class="btn-primary px-4 py-2 rounded-xl text-white flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Nueva Cita
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="gradient-card rounded-xl p-4 border border-red-900/20">
+                        <p id="citas-mes" class="text-2xl font-bold text-white">0</p>
+                        <p class="text-sm text-gray-400">Citas este mes</p>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-red-900/20">
+                        <p id="tatuajes-mes" class="text-2xl font-bold text-red-400">0</p>
+                        <p class="text-sm text-gray-400">Tatuajes</p>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-red-900/20">
+                        <p id="perforaciones-mes" class="text-2xl font-bold text-purple-400">0</p>
+                        <p class="text-sm text-gray-400">Perforaciones</p>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-red-900/20">
+                        <p id="completadas-mes" class="text-2xl font-bold text-green-400">0</p>
+                        <p class="text-sm text-gray-400">Completadas</p>
+                    </div>
+                </div>
+
+                <div class="card-tattoo gradient-card rounded-2xl p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 id="calendario-mes" class="text-xl font-bold text-white"></h3>
+                        <div class="flex gap-2">
+                            <button onclick="changeMonth(-1)" class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition">
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="changeMonth(1)" class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition">
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 mb-2">
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Dom</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Lun</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Mar</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Mié</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Jue</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Vie</div>
+                        <div class="text-center text-sm font-medium text-gray-500 py-2">Sáb</div>
+                    </div>
+                    <div id="calendario-grid" class="grid grid-cols-7 gap-1">
+                        <!-- Calendario se renderiza aquí -->
+                    </div>
+                </div>
+
+                <div id="citas-dia-seleccionado" class="hidden card-tattoo gradient-card rounded-2xl p-6">
+                    <h3 id="titulo-citas-dia" class="text-lg font-bold text-white mb-4"></h3>
+                    <div id="lista-citas-dia" class="space-y-3">
+                        <!-- Citas del día se renderizan aquí -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEGUIMIENTO VIEW -->
+            <div id="view-seguimiento" class="view-section hidden max-w-7xl mx-auto">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-white">Seguimiento de Perforaciones</h2>
+                    <p class="text-gray-400 mt-1">Clientes listos para cambio de joyería (2 meses después)</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="gradient-card rounded-xl p-4 border border-yellow-500/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                                <i data-lucide="bell" class="w-6 h-6 text-yellow-400"></i>
+                            </div>
+                            <div>
+                                <p id="listos-contactar" class="text-2xl font-bold text-white">0</p>
+                                <p class="text-sm text-yellow-400">Listos para contactar</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-blue-500/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                <i data-lucide="clock" class="w-6 h-6 text-blue-400"></i>
+                            </div>
+                            <div>
+                                <p id="en-seguimiento" class="text-2xl font-bold text-white">0</p>
+                                <p class="text-sm text-blue-400">En seguimiento</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-green-500/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+                            </div>
+                            <div>
+                                <p id="ya-contactados" class="text-2xl font-bold text-white">0</p>
+                                <p class="text-sm text-green-400">Ya contactados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="alerta-seguimiento" class="hidden mb-6 p-4 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 text-yellow-400"></i>
+                        <div>
+                            <p id="mensaje-alerta" class="font-semibold text-yellow-400"></p>
+                            <p class="text-sm text-gray-300">Han pasado aproximadamente 2 meses desde su perforación.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="gem" class="w-5 h-5 text-yellow-400"></i>
+                            Listos para Ofrecer Joyería
+                        </h3>
+                        <div id="lista-listos" class="space-y-3">
+                            <p class="text-gray-400 text-center py-4">No hay clientes listos para contactar</p>
+                        </div>
+                    </div>
+                    <div class="card-tattoo gradient-card rounded-2xl p-6">
+                        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                            <i data-lucide="clock" class="w-5 h-5 text-blue-400"></i>
+                            En Seguimiento
+                        </h3>
+                        <div id="lista-pendientes" class="space-y-3 max-h-96 overflow-y-auto">
+                            <p class="text-gray-400 text-center py-4">No hay clientes en seguimiento</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEALTAD VIEW -->
+            <div id="view-lealtad" class="view-section hidden max-w-7xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white">Programa de Lealtad</h2>
+                        <p class="text-gray-400 mt-1">Estrellas, recompensas y beneficios</p>
+                    </div>
+                    <button onclick="openModal('compra')" class="btn-gold px-4 py-2 rounded-xl flex items-center gap-2">
+                        <i data-lucide="gift" class="w-4 h-4"></i>
+                        Registrar Compra
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="gradient-card rounded-xl p-4 border border-yellow-500/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                                <i data-lucide="star" class="w-5 h-5 text-yellow-400"></i>
+                            </div>
+                            <div>
+                                <p id="lealtad-total-estrellas" class="text-2xl font-bold text-white">0</p>
+                                <p class="text-sm text-gray-400">Estrellas totales</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-purple-500/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                <i data-lucide="crown" class="w-5 h-5 text-purple-400"></i>
+                            </div>
+                            <div>
+                                <p id="lealtad-vip" class="text-2xl font-bold text-white">0</p>
+                                <p class="text-sm text-gray-400">Clientes VIP</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-blue-500/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <div>
+                                <p id="lealtad-activos" class="text-2xl font-bold text-white">0</p>
+                                <p class="text-sm text-gray-400">Clientes activos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gradient-card rounded-xl p-4 border border-green-500/20">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                <i data-lucide="gift" class="w-5 h-5 text-green-400"></i>
+                            </div>
+                            <div>
+                                <p id="lealtad-descuentos" class="text-2xl font-bold text-white">0</p>
+                                <p class="text-sm text-gray-400">Descuentos disponibles</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-tattoo gradient-card rounded-2xl p-6 mb-6">
+                    <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="info" class="w-5 h-5 text-yellow-400"></i>
+                        ¿Cómo funciona?
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i data-lucide="gem" class="w-8 h-8 text-yellow-400"></i>
+                            </div>
+                            <h4 class="font-semibold text-white mb-2">1. Compra Joyería</h4>
+                            <p class="text-sm text-gray-400">Por cada <span class="text-yellow-400 font-semibold">$300</span> acumulas <span class="text-yellow-400 font-semibold">1 estrella</span></p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i data-lucide="star" class="w-8 h-8 text-yellow-400"></i>
+                            </div>
+                            <h4 class="font-semibold text-white mb-2">2. Acumula Estrellas</h4>
+                            <p class="text-sm text-gray-400">Junta <span class="text-yellow-400 font-semibold">5 estrellas</span> para tu recompensa</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i data-lucide="gift" class="w-8 h-8 text-yellow-400"></i>
+                            </div>
+                            <h4 class="font-semibold text-white mb-2">3. Canjea tu Premio</h4>
+                            <p class="text-sm text-gray-400">Obtén <span class="text-yellow-400 font-semibold">50% de descuento</span> en joyería</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-tattoo gradient-card rounded-2xl p-6">
+                    <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="award" class="w-5 h-5 text-yellow-400"></i>
+                        Ranking de Clientes
+                    </h3>
+                    <div id="ranking-clientes" class="space-y-3">
+                        <!-- Ranking se renderiza aquí -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modal-overlay" class="fixed inset-0 modal-overlay z-50 hidden items-center justify-center p-4">
+        <!-- Modal Nuevo Cliente -->
+        <div id="modal-cliente" class="modal-content hidden bg-gray-900 border border-red-900/30 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white">Registrar Nuevo Cliente</h3>
+                <button onclick="closeModal()" class="p-2 hover:bg-white/10 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="saveCliente(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Nombre completo *</label>
+                        <input type="text" name="nombre" required class="input-dark w-full px-3 py-2 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Teléfono *</label>
+                        <input type="tel" name="telefono" required class="input-dark w-full px-3 py-2 rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Email</label>
+                    <input type="email" name="email" class="input-dark w-full px-3 py-2 rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Instagram</label>
+                        <input type="text" name="instagram" placeholder="@usuario" class="input-dark w-full px-3 py-2 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Facebook</label>
+                        <input type="text" name="facebook" class="input-dark w-full px-3 py-2 rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Fecha de nacimiento</label>
+                    <input type="date" name="fechaNacimiento" class="input-dark w-full px-3 py-2 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Notas</label>
+                    <textarea name="notas" rows="3" class="input-dark w-full px-3 py-2 rounded-lg resize-none"></textarea>
+                </div>
+                <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-medium">
+                    Guardar Cliente
+                </button>
+            </form>
+        </div>
+
+        <!-- Modal Nueva Cita -->
+        <div id="modal-cita" class="modal-content hidden bg-gray-900 border border-red-900/30 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white">Programar Nueva Cita</h3>
+                <button onclick="closeModal()" class="p-2 hover:bg-white/10 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="saveCita(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Cliente *</label>
+                    <select name="clienteId" required class="input-dark w-full px-3 py-2 rounded-lg">
+                        <option value="">Selecciona un cliente</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Fecha *</label>
+                        <input type="date" name="fecha" required class="input-dark w-full px-3 py-2 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Hora *</label>
+                        <input type="time" name="hora" required class="input-dark w-full px-3 py-2 rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Servicio *</label>
+                    <select name="servicio" required class="input-dark w-full px-3 py-2 rounded-lg">
+                        <option value="tatuaje">🎨 Tatuaje</option>
+                        <option value="perforacion">💎 Perforación</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Notas</label>
+                    <textarea name="notas" rows="2" class="input-dark w-full px-3 py-2 rounded-lg resize-none"></textarea>
+                </div>
+                <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-medium">
+                    Guardar Cita
+                </button>
+            </form>
+        </div>
+
+        <!-- Modal Nueva Compra -->
+        <div id="modal-compra" class="modal-content hidden bg-gray-900 border border-yellow-500/30 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="star" class="w-5 h-5 text-yellow-400"></i>
+                    Registrar Compra
+                </h3>
+                <button onclick="closeModal()" class="p-2 hover:bg-white/10 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="saveCompra(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Cliente *</label>
+                    <select name="clienteId" required class="input-dark w-full px-3 py-2 rounded-lg">
+                        <option value="">Selecciona un cliente</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Tipo de compra *</label>
+                    <select name="tipo" required class="input-dark w-full px-3 py-2 rounded-lg">
+                        <option value="joyeria">💍 Joyería</option>
+                        <option value="tatuaje">🎨 Tatuaje</option>
+                        <option value="perforacion">💎 Perforación</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Descripción</label>
+                    <input type="text" name="descripcion" placeholder="Ej: Piercing de nariz..." class="input-dark w-full px-3 py-2 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Monto ($) *</label>
+                    <input type="number" name="monto" min="0" step="0.01" required class="input-dark w-full px-3 py-2 rounded-lg">
+                    <p class="text-xs text-yellow-400/70 mt-1">💡 Las compras de joyería ≥$300 acumulan 1 estrella por cada $300</p>
+                </div>
+                <button type="submit" class="btn-gold w-full py-3 rounded-xl font-medium">
+                    Registrar Compra
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50"></div>
+
+    <script>
+        // ===== DATA MANAGEMENT =====
+        const STORAGE_KEY = 'inkstudio_crm_data';
+        
+        let data = { clientes: [], citas: [] };
+        let currentDate = new Date();
+        let selectedDate = null;
+
+        function generateId() {
+            return Math.random().toString(36).substring(2, 9);
+        }
+
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                data = JSON.parse(stored);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadData();
+            renderAll();
+            
+            // Mobile menu
+            document.getElementById('mobile-menu-btn').addEventListener('click', toggleSidebar);
+        });
+
+        function renderAll() {
+            renderDashboard();
+            renderClientes();
+            renderCitas();
+            renderSeguimiento();
+            renderLealtad();
+            updateClienteSelects();
+            lucide.createIcons();
+        }
+
+        // ===== NAVIGATION =====
+        function showView(view) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${view}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+                el.classList.add('text-gray-400');
+            });
+            document.querySelector(`[data-view="${view}"]`).classList.add('active');
+            document.querySelector(`[data-view="${view}"]`).classList.remove('text-gray-400');
+            
+            if (window.innerWidth < 1024) {
+                toggleSidebar();
+            }
+            
+            renderAll();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // ===== DASHBOARD =====
+        function renderDashboard() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const citasHoy = data.citas.filter(c => c.fecha === hoy);
+            
+            document.getElementById('stat-clientes').textContent = data.clientes.length;
+            document.getElementById('stat-citas-hoy').textContent = citasHoy.length;
+            document.getElementById('stat-pendientes').textContent = data.citas.filter(c => c.estado === 'pendiente').length;
+            document.getElementById('stat-vip').textContent = data.clientes.filter(c => c.estrellas >= 5).length;
+        }
+
+        // ===== CLIENTES =====
+        function renderClientes() {
+            const grid = document.getElementById('clientes-grid');
+            const searchTerm = document.getElementById('search-clientes').value.toLowerCase();
+            
+            const filtered = data.clientes.filter(c => 
+                c.nombre.toLowerCase().includes(searchTerm) ||
+                c.telefono.includes(searchTerm) ||
+                (c.email && c.email.toLowerCase().includes(searchTerm))
+            );
+            
+            document.getElementById('total-clientes-stat').textContent = data.clientes.length;
+            document.getElementById('clientes-5-estrellas').textContent = data.clientes.filter(c => c.estrellas >= 5).length;
+            document.getElementById('total-estrellas').textContent = data.clientes.reduce((acc, c) => acc + c.estrellas, 0);
+            
+            grid.innerHTML = filtered.map(cliente => `
+                <div class="card-tattoo gradient-card rounded-xl p-5">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-lg">
+                                ${cliente.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">${cliente.nombre}</h3>
+                                <p class="text-sm text-gray-400">${new Date(cliente.fechaRegistro).toLocaleDateString('es-MX')}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteCliente('${cliente.id}')" class="p-2 hover:bg-red-500/20 rounded-lg text-red-400">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center gap-2 text-sm text-gray-300">
+                            <i data-lucide="phone" class="w-4 h-4 text-gray-500"></i>
+                            ${cliente.telefono}
+                        </div>
+                        ${cliente.email ? `
+                        <div class="flex items-center gap-2 text-sm text-gray-300">
+                            <i data-lucide="mail" class="w-4 h-4 text-gray-500"></i>
+                            ${cliente.email}
+                        </div>` : ''}
+                        ${cliente.instagram ? `
+                        <div class="flex items-center gap-2 text-sm text-gray-300">
+                            <i data-lucide="at-sign" class="w-4 h-4 text-pink-400"></i>
+                            @${cliente.instagram}
+                        </div>` : ''}
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-700">
+                        <div class="flex items-center gap-1">
+                            ${[...Array(5)].map((_, i) => `
+                                <i data-lucide="star" class="w-4 h-4 ${i < cliente.estrellas ? 'star-filled' : 'star-empty'}" ${i < cliente.estrellas ? 'fill="currentColor"' : ''}></i>
+                            `).join('')}
+                            <span class="text-sm text-gray-400 ml-2">${cliente.estrellas}/5</span>
+                        </div>
+                        ${cliente.estrellas >= 5 ? `
+                        <button onclick="canjearEstrellas('${cliente.id}', '${cliente.nombre}')" class="btn-gold px-3 py-1 rounded-lg text-sm flex items-center gap-1">
+                            <i data-lucide="gift" class="w-4 h-4"></i>
+                            Canjear
+                        </button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i data-lucide="users" class="w-16 h-16 text-gray-600 mx-auto mb-4"></i>
+                        <p class="text-gray-400 text-lg">No se encontraron clientes</p>
+                    </div>
+                `;
+            }
+        }
+
+        function filterClientes() {
+            renderClientes();
+            lucide.createIcons();
+        }
+
+        function saveCliente(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const cliente = {
+                id: generateId(),
+                nombre: form.nombre.value,
+                telefono: form.telefono.value,
+                email: form.email.value,
+                instagram: form.instagram.value,
+                facebook: form.facebook.value,
+                fechaNacimiento: form.fechaNacimiento.value,
+                notas: form.notas.value,
+                fechaRegistro: new Date().toISOString(),
+                estrellas: 0,
+                historialCompras: []
+            };
+            
+            data.clientes.push(cliente);
+            saveData();
+            closeModal();
+            renderAll();
+            showToast('Cliente registrado exitosamente');
+        }
+
+        function deleteCliente(id) {
+            if (confirm('¿Eliminar este cliente? También se eliminarán sus citas.')) {
+                data.clientes = data.clientes.filter(c => c.id !== id);
+                data.citas = data.citas.filter(c => c.clienteId !== id);
+                saveData();
+                renderAll();
+                showToast('Cliente eliminado');
+            }
+        }
+
+        function canjearEstrellas(clienteId, nombre) {
+            const cliente = data.clientes.find(c => c.id === clienteId);
+            if (!cliente || cliente.estrellas < 5) {
+                alert('El cliente no tiene suficientes estrellas');
+                return;
+            }
+            
+            cliente.estrellas -= 5;
+            saveData();
+            renderAll();
+            alert(`¡${nombre} ha canjeado 5 estrellas por 50% de descuento en joyería!`);
+        }
+
+        // ===== CITAS =====
+        function renderCitas() {
+            const mes = currentDate.getMonth();
+            const anio = currentDate.getFullYear();
+            
+            document.getElementById('calendario-mes').textContent = 
+                new Date(anio, mes).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+            
+            const citasMes = data.citas.filter(c => {
+                const d = new Date(c.fecha);
+                return d.getMonth() === mes && d.getFullYear() === anio;
+            });
+            
+            document.getElementById('citas-mes').textContent = citasMes.length;
+            document.getElementById('tatuajes-mes').textContent = citasMes.filter(c => c.servicio === 'tatuaje').length;
+            document.getElementById('perforaciones-mes').textContent = citasMes.filter(c => c.servicio === 'perforacion').length;
+            document.getElementById('completadas-mes').textContent = citasMes.filter(c => c.estado === 'completada').length;
+            
+            renderCalendario();
+        }
+
+        function renderCalendario() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date().toISOString().split('T')[0];
+            
+            const grid = document.getElementById('calendario-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += '<div></div>';
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayCitas = data.citas.filter(c => c.fecha === dateStr);
+                const hasTattoo = dayCitas.some(c => c.servicio === 'tatuaje');
+                const hasPiercing = dayCitas.some(c => c.servicio === 'perforacion');
+                
+                grid.innerHTML += `
+                    <div onclick="selectDate('${dateStr}')" 
+                         class="calendar-day rounded-lg border border-gray-700/50 p-2 cursor-pointer ${dateStr === today ? 'today' : 'bg-gray-800/30'} ${selectedDate === dateStr ? 'ring-2 ring-red-500' : ''}">
+                        <span class="text-sm font-medium ${dateStr === today ? 'text-red-400' : 'text-gray-300'}">${day}</span>
+                        <div class="mt-1 space-y-1">
+                            ${dayCitas.slice(0, 2).map(c => `
+                                <div class="text-xs px-1.5 py-0.5 rounded truncate ${c.servicio === 'tatuaje' ? 'bg-red-500/20 text-red-300' : 'bg-purple-500/20 text-purple-300'}">
+                                    ${c.hora} ${c.clienteNombre.split(' ')[0]}
+                                </div>
+                            `).join('')}
+                            ${dayCitas.length > 2 ? `<div class="text-xs text-gray-500">+${dayCitas.length - 2}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function changeMonth(dir) {
+            currentDate.setMonth(currentDate.getMonth() + dir);
+            renderCitas();
+        }
+
+        function selectDate(dateStr) {
+            selectedDate = dateStr;
+            renderCalendario();
+            renderCitasDia();
+        }
+
+        function renderCitasDia() {
+            if (!selectedDate) return;
+            
+            const citasDia = data.citas.filter(c => c.fecha === selectedDate);
+            const container = document.getElementById('citas-dia-seleccionado');
+            const titulo = document.getElementById('titulo-citas-dia');
+            const lista = document.getElementById('lista-citas-dia');
+            
+            container.classList.remove('hidden');
+            titulo.textContent = `Citas del ${new Date(selectedDate).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+            
+            if (citasDia.length === 0) {
+                lista.innerHTML = '<p class="text-gray-400 text-center py-4">No hay citas programadas</p>';
+                return;
+            }
+            
+            lista.innerHTML = citasDia.map(cita => `
+                <div class="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 border border-gray-700/50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg ${cita.servicio === 'tatuaje' ? 'bg-red-500/20' : 'bg-purple-500/20'} flex items-center justify-center">
+                            <i data-lucide="${cita.servicio === 'tatuaje' ? 'scissors' : 'circle-dot'}" class="w-5 h-5 ${cita.servicio === 'tatuaje' ? 'text-red-400' : 'text-purple-400'}"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-white">${cita.clienteNombre}</p>
+                            <div class="flex items-center gap-2 text-sm text-gray-400">
+                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                ${cita.hora}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-xs border ${getEstadoClass(cita.estado)}">
+                            ${cita.estado}
+                        </span>
+                        ${cita.estado !== 'completada' && cita.estado !== 'cancelada' ? `
+                        <button onclick="updateCitaEstado('${cita.id}', 'completada')" class="p-2 hover:bg-green-500/20 rounded-lg text-green-400">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="updateCitaEstado('${cita.id}', 'cancelada')" class="p-2 hover:bg-red-500/20 rounded-lg text-red-400">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        </button>
+                        ` : ''}
+                        <button onclick="deleteCita('${cita.id}')" class="p-2 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function getEstadoClass(estado) {
+            const classes = {
+                pendiente: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+                confirmada: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                completada: 'bg-green-500/20 text-green-400 border-green-500/30',
+                cancelada: 'bg-red-500/20 text-red-400 border-red-500/30'
+            };
+            return classes[estado] || classes.pendiente;
+        }
+
+        function saveCita(e) {
+            e.preventDefault();
+            const form = e.target;
+            const cliente = data.clientes.find(c => c.id === form.clienteId.value);
+            
+            if (!cliente) return;
+            
+            const cita = {
+                id: generateId(),
+                clienteId: form.clienteId.value,
+                clienteNombre: cliente.nombre,
+                fecha: form.fecha.value,
+                hora: form.hora.value,
+                servicio: form.servicio.value,
+                estado: 'pendiente',
+                notas: form.notas.value
+            };
+            
+            data.citas.push(cita);
+            saveData();
+            closeModal();
+            renderAll();
+            showToast('Cita programada exitosamente');
+        }
+
+        function updateCitaEstado(id, estado) {
+            const cita = data.citas.find(c => c.id === id);
+            if (cita) {
+                cita.estado = estado;
+                saveData();
+                renderAll();
+                showToast(`Cita ${estado}`);
+            }
+        }
+
+        function deleteCita(id) {
+            if (confirm('¿Eliminar esta cita?')) {
+                data.citas = data.citas.filter(c => c.id !== id);
+                saveData();
+                renderAll();
+                showToast('Cita eliminada');
+            }
+        }
+
+        // ===== SEGUIMIENTO =====
+        function renderSeguimiento() {
+            const hoy = new Date();
+            const perforaciones = data.citas.filter(c => c.servicio === 'perforacion' && c.estado === 'completada');
+            
+            const seguimientos = perforaciones.map(cita => {
+                const fechaPerf = new Date(cita.fecha);
+                const dias = Math.floor((hoy.getTime() - fechaPerf.getTime()) / (24 * 60 * 60 * 1000));
+                return {
+                    ...cita,
+                    diasTranscurridos: dias,
+                    estado: dias >= 55 && dias <= 65 ? 'listo' : dias > 65 ? 'contactado' : 'pendiente'
+                };
+            }).filter(s => s.diasTranscurridos >= 45 && s.diasTranscurridos <= 90)
+              .sort((a, b) => b.diasTranscurridos - a.diasTranscurridos);
+            
+            const listos = seguimientos.filter(s => s.estado === 'listo');
+            const pendientes = seguimientos.filter(s => s.estado === 'pendiente');
+            const contactados = seguimientos.filter(s => s.estado === 'contactado');
+            
+            document.getElementById('listos-contactar').textContent = listos.length;
+            document.getElementById('en-seguimiento').textContent = pendientes.length;
+            document.getElementById('ya-contactados').textContent = contactados.length;
+            
+            // Alerta
+            const alerta = document.getElementById('alerta-seguimiento');
+            if (listos.length > 0) {
+                alerta.classList.remove('hidden');
+                document.getElementById('mensaje-alerta').textContent = 
+                    `¡Tienes ${listos.length} cliente${listos.length > 1 ? 's' : ''} listo${listos.length > 1 ? 's' : ''} para contactar!`;
+                document.getElementById('seguimiento-badge').classList.remove('hidden');
+            } else {
+                alerta.classList.add('hidden');
+                document.getElementById('seguimiento-badge').classList.add('hidden');
+            }
+            
+            // Lista listos
+            const listaListos = document.getElementById('lista-listos');
+            if (listos.length === 0) {
+                listaListos.innerHTML = '<p class="text-gray-400 text-center py-4">No hay clientes listos para contactar</p>';
+            } else {
+                listaListos.innerHTML = listos.map(item => `
+                    <div class="p-4 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                                    <i data-lucide="circle-dot" class="w-5 h-5 text-yellow-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white">${item.clienteNombre}</p>
+                                    <p class="text-sm text-gray-400">
+                                        <i data-lucide="calendar" class="w-3 h-3 inline mr-1"></i>
+                                        ${new Date(item.fecha).toLocaleDateString('es-MX')}
+                                    </p>
+                                    <p class="text-sm text-yellow-400 mt-1">${item.diasTranscurridos} días transcurridos</p>
+                                </div>
+                            </div>
+                            <a href="https://wa.me/?text=${getWhatsAppMessage(item.clienteNombre)}" target="_blank" rel="noopener noreferrer"
+                               class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-1">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                Contactar
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Lista pendientes
+            const listaPendientes = document.getElementById('lista-pendientes');
+            if (pendientes.length === 0) {
+                listaPendientes.innerHTML = '<p class="text-gray-400 text-center py-4">No hay clientes en seguimiento</p>';
+            } else {
+                listaPendientes.innerHTML = pendientes.map(item => `
+                    <div class="p-3 rounded-lg bg-gray-800/50 border border-gray-700/50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                    <i data-lucide="circle-dot" class="w-4 h-4 text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-white">${item.clienteNombre}</p>
+                                    <p class="text-xs text-gray-400">${item.diasTranscurridos} días • Listo en ~${60 - item.diasTranscurridos} días</p>
+                                </div>
+                            </div>
+                            <div class="w-20">
+                                <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full" style="width: ${Math.min((item.diasTranscurridos / 60) * 100, 100)}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function getWhatsAppMessage(nombre) {
+            return encodeURIComponent(
+                `¡Hola ${nombre.split(' ')[0]}! 👋\n\n` +
+                `Espero que estés muy bien. Paso a recordarte que han pasado aproximadamente 2 meses desde tu perforación. 🎉\n\n` +
+                `¿Sabías que ahora es el momento perfecto para cambiar tu joyería? Tenemos piezas increíbles: ✨\n\n` +
+                `• Acero quirúrgico de alta calidad\n` +
+                `• Titanio hipoalergénico\n` +
+                `• Diseños exclusivos\n` +
+                `• ¡Y si compras piezas mayores a $300, acumulas estrellas! ⭐\n\n` +
+                `¿Te gustaría pasar a ver las opciones? Te esperamos. 😊`
+            );
+        }
+
+        // ===== LEALTAD =====
+        function renderLealtad() {
+            const totalEstrellas = data.clientes.reduce((acc, c) => acc + c.estrellas, 0);
+            const clientesVIP = data.clientes.filter(c => c.estrellas >= 5);
+            const clientesActivos = data.clientes.filter(c => c.estrellas > 0);
+            
+            document.getElementById('lealtad-total-estrellas').textContent = totalEstrellas;
+            document.getElementById('lealtad-vip').textContent = clientesVIP.length;
+            document.getElementById('lealtad-activos').textContent = clientesActivos.length;
+            document.getElementById('lealtad-descuentos').textContent = Math.floor(totalEstrellas / 5);
+            
+            // Ranking
+            const ranking = document.getElementById('ranking-clientes');
+            const clientesConEstrellas = data.clientes.filter(c => c.estrellas > 0)
+                .sort((a, b) => b.estrellas - a.estrellas);
+            
+            if (clientesConEstrellas.length === 0) {
+                ranking.innerHTML = `
+                    <div class="text-center py-8">
+                        <i data-lucide="star" class="w-12 h-12 text-gray-600 mx-auto mb-3"></i>
+                        <p class="text-gray-400">Aún no hay clientes con estrellas</p>
+                    </div>
+                `;
+            } else {
+                ranking.innerHTML = clientesConEstrellas.map((c, i) => `
+                    <div class="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 border border-gray-700/50">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full ${i < 3 ? 'bg-yellow-500/30 text-yellow-400' : 'bg-gray-700 text-gray-400'} flex items-center justify-center font-bold">
+                                ${i < 3 ? '👑' : i + 1}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white">${c.nombre}</p>
+                                <p class="text-sm text-gray-400">${new Date(c.fechaRegistro).toLocaleDateString('es-MX')}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-1">
+                                ${[...Array(5)].map((_, j) => `
+                                    <i data-lucide="star" class="w-5 h-5 ${j < c.estrellas ? 'star-filled' : 'star-empty'}" ${j < c.estrellas ? 'fill="currentColor"' : ''}></i>
+                                `).join('')}
+                            </div>
+                            <span class="text-lg font-bold text-yellow-400">${c.estrellas}</span>
+                            ${c.estrellas >= 5 ? `
+                            <button onclick="canjearEstrellas('${c.id}', '${c.nombre}')" class="btn-gold px-3 py-1 rounded-lg text-sm flex items-center gap-1">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                Canjear
+                            </button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function saveCompra(e) {
+            e.preventDefault();
+            const form = e.target;
+            const cliente = data.clientes.find(c => c.id === form.clienteId.value);
+            
+            if (!cliente) return;
+            
+            const monto = parseFloat(form.monto.value);
+            const tipo = form.tipo.value;
+            
+            // Calcular estrellas
+            const estrellasGanadas = tipo === 'joyeria' && monto >= 300 ? Math.floor(monto / 300) : 0;
+            
+            const compra = {
+                id: generateId(),
+                tipo,
+                descripcion: form.descripcion.value,
+                monto,
+                fecha: new Date().toISOString(),
+                estrellasGanadas
+            };
+            
+            cliente.historialCompras.push(compra);
+            cliente.estrellas += estrellasGanadas;
+            
+            saveData();
+            closeModal();
+            renderAll();
+            
+            if (estrellasGanadas > 0) {
+                showToast(`¡Compra registrada! ${estrellasGanadas} estrella(s) ganada(s)`);
+            } else {
+                showToast('Compra registrada exitosamente');
+            }
+        }
+
+        // ===== MODALS =====
+        function openModal(type) {
+            document.getElementById('modal-overlay').classList.remove('hidden');
+            document.getElementById('modal-overlay').classList.add('flex');
+            document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`modal-${type}`).classList.remove('hidden');
+            updateClienteSelects();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            document.getElementById('modal-overlay').classList.remove('flex');
+            document.querySelectorAll('form').forEach(f => f.reset());
+        }
+
+        function updateClienteSelects() {
+            document.querySelectorAll('select[name="clienteId"]').forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">Selecciona un cliente</option>' +
+                    data.clientes.map(c => `<option value="${c.id}">${c.nombre} (${c.estrellas} ⭐)</option>`).join('');
+                select.value = currentValue;
+            });
+        }
+
+        // ===== UTILS =====
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'gradient-primary text-white px-6 py-4 rounded-xl shadow-lg mb-2 animate-pulse';
+            toast.innerHTML = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `InkStudio_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            showToast('Datos exportados exitosamente');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-overlay') closeModal();
+        });
+    </script>
+</body>
+</html>
